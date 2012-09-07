@@ -1,7 +1,7 @@
 require "net/http"
 
 module Paperclip
-  module Attachment
+  class Attachment
 
     class Invalidation
 
@@ -25,7 +25,9 @@ module Paperclip
         req.basic_auth(@cache_invalidation_username,
                        @cache_invalidation_password) if @cache_invalidation_username.present?
         req.set_form_data(@cache_invalidation_param_name => URI.parse(@url).path)
-        Net::HTTP.new(uri.host, uri.port).start { |http| http.request(req) }
+        net = Net::HTTP.new(uri.host, uri.port)
+        net.use_ssl = !! (@cache_invalidation_url =~ /^https/)
+        net.start { |http| http.request(req) }
       end
 
       def invalidate_on_cloudflare
